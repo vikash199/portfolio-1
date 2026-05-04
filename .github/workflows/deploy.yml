@@ -1,0 +1,32 @@
+name: Deploy Portfolio
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Copy file via SSH
+        uses: appleboy/scp-action@master
+        with:
+          host: 68.233.106.94
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "vikash_portfolio.html"
+          target: "/home/ubuntu/"
+
+      - name: Move to Nginx Web Root
+        uses: appleboy/ssh-action@master
+        with:
+          host: 68.233.106.94
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # This renames it to index.html so it loads automatically at your domain
+            sudo mv /home/ubuntu/vikash_portfolio.html /var/www/html/index.html
+            sudo chown www-data:www-data /var/www/html/index.html
